@@ -10,6 +10,7 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [editingTodo, setEditingTodo] = useState(null);
   const [editedText, setEditedText] = useState("");
+  const [selectedTodo, setSelectedTodo] = useState(null);
 
   const addTodo = async (e) => {
     e.preventDefault();
@@ -33,9 +34,26 @@ function App() {
     }
   };
 
+  // fetch todo by ID
+  const getTodoById = async (id) => {
+    try {
+      const response = await axios.get(`/api/todos/${id}`);
+      setSelectedTodo(response.data);
+    } catch (error) {
+      console.log("Error fetching todo by ID:", error);
+    }
+  };
+
   useEffect(() => {
     fetchTodos();
   }, []);
+
+  useEffect(() => {
+    if (selectedTodo) {
+      setEditedText(selectedTodo.text);
+      setEditingTodo(selectedTodo._id);
+    }
+  }, [selectedTodo]);
 
   const startEditing = (todo) => {
     setEditingTodo(todo._id);
@@ -105,7 +123,7 @@ function App() {
           {todos.length === 0 ? (
             <div></div>
           ) : (
-            <div className="flex flex-col gap-4">
+            <div onClick={getTodoById} className="flex flex-col gap-4">
               {todos.map((todo) => (
                 <div key={todo._id}>
                   {editingTodo === todo._id ? (
